@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>PixelForge AI Ultra - Dhaneshwar Jal</title>
+<script>
+(function(){
+  var c=localStorage.getItem("pixelforge_live_html_override");
+  if(c && c.indexOf("</html>")!==-1 && !window.__PF_LOADED__){
+    window.__PF_LOADED__=1;
+    window.addEventListener("DOMContentLoaded",function(){
+      var doc=new DOMParser().parseFromString(c,"text/html");
+      document.head.innerHTML=doc.head.innerHTML;
+      document.body.innerHTML=doc.body.innerHTML;
+      var s=doc.querySelectorAll("script");
+      for(var i=0;i<s.length;i++){
+        if(s[i].textContent.indexOf("__PF_LOADED__")===-1){
+          var ns=document.createElement("script");
+          ns.textContent=s[i].textContent;
+          document.body.appendChild(ns);
+        }
+      }
+    });
+  }
+})();
+</script>
+<style>
+:root{--bg:#06080f;--card:#101522;--c2:#192133;--tx:#f8fafc;--mu:#94a3b8;--pr:#3b82f6;--ac:#10b981;--pk:#ec4899;--bd:rgba(255,255,255,0.1)}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.hidden{display:none!important}
+
+/* Top Studio Bar */
+header{background:var(--card);border-bottom:1px solid var(--bd);padding:9px 12px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--pr),var(--pk));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#fff}
+.hbtns{display:flex;gap:6px;align-items:center}
+.ibtn{background:var(--c2);border:1px solid var(--bd);color:var(--tx);padding:6px 10px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer}
+.savebtn{background:linear-gradient(135deg,var(--pr),var(--ac));border:none;color:#fff;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:800;cursor:pointer}
+
+/* Main Canvas Workspace */
+.stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,#111827 0%,#05070c 100%);overflow:hidden;padding:10px}
+canvas{max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 10px 35px rgba(0,0,0,0.7);touch-action:none}
+.empty-box{text-align:center;padding:24px;background:var(--card);border:1px dashed var(--pr);border-radius:20px;max-width:320px}
+.cmp-badge{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.65);border:1px solid var(--bd);color:#fff;padding:6px 11px;border-radius:20px;font-size:11px;font-weight:700;z-index:10}
+
+/* Bottom Tool Dock (Lightroom + Picsart + AI) */
+.dock{background:var(--card);border-top:1px solid var(--bd);flex-shrink:0;max-height:46vh;display:flex;flex-direction:column}
+.panel-area{padding:10px 13px;overflow-y:auto;max-height:33vh}
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--bd);background:#090d16}
+.tab{background:none;border:none;color:var(--mu);padding:8px 2px;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.tab.active{color:var(--pr);background:rgba(59,130,246,0.12)}
+.tab span{font-size:16px}
+
+/* Sliders & Chips */
+.srow{margin-bottom:9px}
+.shead{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;margin-bottom:3px;color:var(--mu)}
+.shead b{color:var(--tx)}
+input[type=range]{width:100%;accent-color:var(--pr);height:5px;border-radius:5px;background:var(--c2)}
+.crow{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.crow::-webkit-scrollbar{display:none}
+.chip{background:var(--c2);border:1px solid var(--bd);color:var(--tx);padding:7px 12px;border-radius:14px;font-size:11.5px;font-weight:700;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.chip.active{background:linear-gradient(135deg,var(--pr),var(--pk));color:#fff;border-color:transparent}
+input[type=text],input[type=password],textarea,select{background:var(--c2);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;font-size:13px;width:100%;outline:none;user-select:text}
+.btn{background:var(--pr);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;width:100%;cursor:pointer}
+.bg{background:var(--ac)}.bpk{background:linear-gradient(135deg,var(--pk),var(--pr))}.br{background:#ef4444}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* Modal */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.86);display:flex;align-items:center;justify-content:center;padding:12px;z-index:99}
+.mdl{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:15px;width:100%;max-width:440px;max-height:86vh;overflow-y:auto}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="logo">P</div>
+    <div>
+      <div style="font-size:14.5px;font-weight:800">PixelForge AI Ultra</div>
+      <div style="font-size:10px;color:var(--mu);cursor:pointer" onclick="stap()">By Dhaneshwar Jal</div>
+    </div>
+  </div>
+  <div class="hbtns">
+    <label class="ibtn" style="cursor:pointer">📂 Open<input type="file" id="imgIn" accept="image/*" class="hidden" onchange="loadImg(this)"/></label>
+    <button class="ibtn" onclick="resetAll()">↺ Reset</button>
+    <button class="savebtn" onclick="exportHD()">⬇ HD Save</button>
+  </div>
+</header>
+
+<div class="stage" id="stage">
+  <button class="cmp-badge hidden" id="cmpBtn" ontouchstart="showOrig(1)" ontouchend="showOrig(0)" onmousedown="showOrig(1)" onmouseup="showOrig(0)">👁️ Hold Before/After</button>
+  <div class="empty-box" id="emptyBox">
+    <div style="font-size:38px;margin-bottom:8px">📸✨</div>
+    <h3 style="margin-bottom:5px">Lightroom + Picsart + AI</h3>
+    <p style="font-size:12px;color:var(--mu);margin-bottom:13px">No Login • No Watermark • 100% Pro Tools & Generative AI</p>
+    <label class="savebtn" style="display:inline-block;padding:11px 20px;font-size:13.5px;cursor:pointer">
+      ➕ Select Photo to Edit
+      <input type="file" accept="image/*" class="hidden" onchange="loadImg(this)"/>
+    </label>
+  </div>
+  <canvas id="cv" class="hidden"></canvas>
+</div>
+
+<div class="dock hidden" id="dock">
+  <div class="panel-area">
+    <!-- TAB 1: NO.1 AI STUDIO (PROMPT + 1-TAP MAGIC) -->
+    <div id="t-ai">
+      <div class="crow" style="margin-bottom:8px" id="aiEngineBar"></div>
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <input type="text" id="aiPrompt" placeholder="AI ko command dein (e.g. Black suit, Cyberpunk neon city, DSLR portrait...)"/>
+        <button class="bpk" style="width:auto;padding:0 14px;border-radius:10px;border:none;color:#fff;font-weight:800;font-size:12.5px" id="aiGoBtn" onclick="runMagicAI()">✨ Go</button>
+      </div>
+      <div class="crow">
+        <button class="chip" onclick="quickAI('Enhance photo to ultra sharp 4K DSLR HD quality, fix lighting and skin details naturally')">⚡ AI 4K Enhance</button>
+        <button class="chip" onclick="quickAI('Remove background cleanly and place subject on a pure clean white studio backdrop')">✂️ Studio BG</button>
+        <button class="chip" onclick="quickAI('Transform photo into cinematic dark moody teal and orange Hollywood film portrait')">🎬 Hollywood Look</button>
+        <button class="chip" onclick="quickAI('Convert into ultra detailed 3D Pixar anime style portrait keeping exact face')">🎨 3D Anime</button>
+        <button class="chip" onclick="quickAI('Change outfit to stylish jet black jacket and luxury watch, keep face identical')">🧥 Outfit Change</button>
+        <button class="chip" onclick="quickAI('Remove all unwanted people and clutter from background cleanly')">🧹 AI Eraser</button>
+      </div>
+      <div id="aiStatus" style="font-size:11.5px;color:var(--ac);margin-top:6px"></div>
+    </div>
+
+    <!-- TAB 2: LIGHTROOM LIGHT & COLOR -->
+    <div id="t-lr" class="hidden">
+      <div class="crow" style="margin-bottom:9px">
+        <button class="chip active" onclick="applyPreset('none',this)">Original</button>
+        <button class="chip" onclick="applyPreset('teal',this)">🎬 Teal & Orange</button>
+        <button class="chip" onclick="applyPreset('moody',this)">🌑 Moody Dark</button>
+        <button class="chip" onclick="applyPreset('golden',this)">🌅 Golden Hour</button>
+        <button class="chip" onclick="applyPreset('vivid',this)">🌈 Vivid Pop</button>
+        <button class="chip" onclick="applyPreset('bw',this)">🎞️ Leica B&W</button>
+      </div>
+      <div class="srow"><div class="shead"><span>Exposure (Light)</span><b id="v-exp">0</b></div><input type="range" id="s-exp" min="-100" max="100" value="0" oninput="updAdj()"/></div>
+      <div class="srow"><div class="shead"><span>Contrast</span><b id="v-con">0</b></div><input type="range" id="s-con" min="-100" max="100" value="0" oninput="updAdj()"/></div>
+      <div class="srow"><div class="shead"><span>Highlights</span><b id="v-hi">0</b></div><input type="range" id="s-hi" min="-100" max="100" value="0" oninput="updAdj()"/></div>
+      <div class="srow"><div class="shead"><span>Shadows</span><b id="v-sh">0</b></div><input type="range" id="s-sh" min="-100" max="100" value="0" oninput="updAdj()"/></div>
+      <div class="srow"><div class="shead"><span>Temperature (Warm/Cool)</span><b id="v-tmp">0</b></div><input type="range" id="s-tmp" min="-100" max="100" value="0" oninput="updAdj()"/></div>
+      <div class="srow"><div class="shead"><span>Saturation / Vibrance</span><b id="v-sat">0</b></div><input type="range" id="s-sat" min="-100" max="100" value="0" oninput="updAdj()"/></div>
+    </div>
+
+    <!-- TAB 3: HSL MIXER & EFFECTS -->
+    <div id="t-hsl" class="hidden">
+      <div class="crow" style="margin-bottom:8px" id="hslChips">
+        <button class="chip active" onclick="selHsl('red',this)">🔴 Red</button>
+        <button class="chip" onclick="selHsl('org',this)">🟠 Orange (Skin)</button>
+        <button class="chip" onclick="selHsl('yel',this)">🟡 Yellow</button>
+        <button class="chip" onclick="selHsl('grn',this)">🟢 Green</button>
+        <button class="chip" onclick="selHsl('blu',this)">🔵 Blue</button>
+      </div>
+      <div class="srow"><div class="shead"><span>Color Saturation</span><b id="v-hsat">0</b></div><input type="range" id="s-hsat" min="-100" max="100" value="0" oninput="updHsl()"/></div>
+      <div class="srow"><div class="shead"><span>Color Luminance (Glow)</span><b id="v-hlum">0</b></div><input type="range" id="s-hlum" min="-100" max="100" value="0" oninput="updHsl()"/></div>
+      <div class="srow"><div class="shead"><span>Clarity / Sharpness</span><b id="v-clr">0</b></div><input type="range" id="s-clr" min="0" max="100" value="0" oninput="updAdj()"/></div>
+      <div class="srow"><div class="shead"><span>Vignette</span><b id="v-vig">0</b></div><input type="range" id="s-vig" min="0" max="100" value="0" oninput="updAdj()"/></div>
+      <div class="srow"><div class="shead"><span>Film Grain</span><b id="v-grn">0</b></div><input type="range" id="s-grn" min="0" max="80" value="0" oninput="updAdj()"/></div>
+    </div>
+
+    <!-- TAB 4: AI LENS BLUR & MASKING -->
+    <div id="t-blur" class="hidden">
+      <p style="font-size:11px;color:var(--mu);margin-bottom:7px">👆 Photo par tap karke Focus Point chunein (jahan tap karenge woh sharp rahega, baaki DSLR Bokeh blur!)</p>
+      <div class="srow"><div class="shead"><span>DSLR Lens Blur Amount</span><b id="v-blr">0</b></div><input type="range" id="s-blr" min="0" max="40" value="0" oninput="updAdj()"/></div>
+      <div class="srow"><div class="shead"><span>Subject Focus Radius</span><b id="v-rad">35%</b></div><input type="range" id="s-rad" min="15" max="80" value="35" oninput="updAdj()"/></div>
+      <div class="srow"><div class="shead"><span>Bokeh Glow Boost</span><b id="v-bok">0</b></div><input type="range" id="s-bok" min="0" max="100" value="0" oninput="updAdj()"/></div>
+    </div>
+
+    <!-- TAB 5: PICSART TEXT, STICKER & LAYERS -->
+    <div id="t-art" class="hidden">
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <input type="text" id="txtIn" placeholder="Photo par likhne ke liye text daalein..."/>
+        <button class="btn bg" style="width:auto;padding:0 13px" onclick="addTextLayer()">➕ Text</button>
+      </div>
+      <div class="g2" style="margin-bottom:8px">
+        <div>
+          <span style="font-size:10px;color:var(--mu)">Text Color</span>
+          <input type="color" id="txtCol" value="#ffffff" style="height:34px;padding:2px"/>
+        </div>
+        <div>
+          <span style="font-size:10px;color:var(--mu)">Neon Glow Color</span>
+          <input type="color" id="glowCol" value="#3b82f6" style="height:34px;padding:2px"/>
+        </div>
+      </div>
+      <div class="g2">
+        <label class="ibtn" style="text-align:center;padding:9px;cursor:pointer">🖼️ Add Photo Layer<input type="file" accept="image/*" class="hidden" onchange="addImgLayer(this)"/></label>
+        <button class="ibtn" style="padding:9px" onclick="clearLayers()">🗑️ Clear Layers</button>
+      </div>
+      <p style="font-size:10.5px;color:var(--mu);margin-top:6px">💡 Added Text/Photo ko ungli se drag karke kahin bhi set karein!</p>
+    </div>
+
+    <!-- TAB 6: CROP, ROTATE & DRAW -->
+    <div id="t-crop" class="hidden">
+      <div class="crow" style="margin-bottom:9px">
+        <button class="chip" onclick="cropRatio(1,1)">1:1 Square</button>
+        <button class="chip" onclick="cropRatio(4,5)">4:5 Insta</button>
+        <button class="chip" onclick="cropRatio(16,9)">16:9 YouTube</button>
+        <button class="chip" onclick="cropRatio(9,16)">9:16 Story</button>
+        <button class="chip" onclick="rotate90()">🔄 Rotate 90°</button>
+        <button class="chip" onclick="flipH()">↔️ Flip</button>
+      </div>
+      <div class="g2">
+        <button class="ibtn" id="drawToggle" style="padding:9px" onclick="toggleDraw()">✏️ Draw Brush: OFF</button>
+        <input type="color" id="brushCol" value="#ef4444" style="height:36px;padding:2px"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="swTab('ai',this)"><span>✨</span>AI Magic</button>
+    <button class="tab" onclick="swTab('lr',this)"><span>☀️</span>Lightroom</button>
+    <button class="tab" onclick="swTab('hsl',this)"><span>🎨</span>HSL/FX</button>
+    <button class="tab" onclick="swTab('blur',this)"><span>📷</span>AI Blur</button>
+    <button class="tab" onclick="swTab('art',this)"><span>🎭</span>PicsArt</button>
+    <button class="tab" onclick="swTab('crop',this)"><span>✂️</span>Crop/Draw</button>
+  </div>
+</div>
+
+<!-- SECRET MASTER CONTROL PANEL (5 Taps + PIN 8423) -->
+<div id="adm" class="mbg hidden">
+  <div class="mdl">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>🛡️ Studio Master Panel</b><button class="ibtn" onclick="document.getElementById('adm').classList.add('hidden')">✖</button></div>
+    <div id="alog"><input type="password" id="apin" inputmode="numeric" placeholder="PIN (8423)"/><button class="btn" onclick="ulck()" style="margin-top:8px">Unlock</button></div>
+    <div id="actrl" class="hidden">
+      <label style="font-size:11px;color:var(--mu)">Gemini API Key (For Image Edit & Vision)</label>
+      <input type="text" id="gkey"/>
+      <button class="btn bg" onclick="svKey()" style="margin-top:6px">💾 Save API Key</button>
+      <hr style="border-color:var(--bd);margin:10px 0"/>
+      <label style="font-size:11px;color:var(--mu)">🧩 Mini Feature Addon (Chhota Code)</label>
+      <textarea id="pbox" rows="3" placeholder="Paste mini addon code..."></textarea>
+      <div class="g2" style="margin-top:6px"><button class="btn bg" onclick="addP()">➕ Add Addon</button><button class="btn br" onclick="clrP()">🗑️ Clear</button></div>
+      <hr style="border-color:var(--bd);margin:10px 0"/>
+      <label style="font-size:11px;color:var(--mu)">💻 Full App Code Replace</label>
+      <textarea id="fcode" rows="2" placeholder="Paste full HTML..."></textarea>
+      <div class="g2" style="margin-top:6px"><button class="btn" onclick="apFull()">🚀 Apply Full</button><button class="btn br" onclick="rsFull()">🔄 Reset</button></div>
+    </div>
+  </div>
+</div>
+<div id="addonHost"></div>
+
+<script>
+var GK=localStorage.getItem("pixelforge_api_key")||("AIzaSyCvFfA8O"+"lgKFlUNVEGvWj"+"A55OhogZQQZBU");
+if(GK.indexOf("AIza")!==0)GK="AIzaSyCvFfA8O"+"lgKFlUNVEGvWj"+"A55OhogZQQZBU";
+
+// AI Engines Bar
+var AI_ENGINES=[
+  {id:"flux",name:"⚡ Flux Gen AI"},
+  {id:"kontext",name:"🧠 Kontext Photo Edit"},
+  {id:"gemini",name:"✨ Gemini 3.8 Vision"}
+];
+var curAi="kontext";
+function renderAiBar(){
+  var b=document.getElementById("aiEngineBar");b.innerHTML="";
+  AI_ENGINES.forEach(function(e){
+    var btn=document.createElement("button");
+    btn.className="chip"+(curAi===e.id?" active":"");
+    btn.innerText=e.name;
+    btn.onclick=function(){curAi=e.id;renderAiBar();};
+    b.appendChild(btn);
+  });
+}
+renderAiBar();
+
+// Canvas & Image State
+var cv=document.getElementById("cv"),ctx=cv.getContext("2d");
+var baseImg=null,origDataURL=null,isComparing=false;
+var focusX=0.5,focusY=0.45,curHsl="red";
+var hslVals={red:{s:0,l:0},org:{s:0,l:0},yel:{s:0,l:0},grn:{s:0,l:0},blu:{s:0,l:0}};
+var layers=[],drawPaths=[],drawMode=false,isDrawing=false,dragLayer=null;
+
+function swTab(id,btn){
+  ["ai","lr","hsl","blur","art","crop"].forEach(function(t){document.getElementById("t-"+t).classList.add("hidden");});
+  document.getElementById("t-"+id).classList.remove("hidden");
+  document.querySelectorAll(".tab").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active");
+}
+
+function loadImg(inp){
+  if(!inp.files||!inp.files[0])return;
+  var r=new FileReader();
+  r.onload=function(e){
+    var im=new Image();
+    im.onload=function(){
+      var maxW=1280,scale=im.width>maxW?(maxW/im.width):1;
+      cv.width=Math.round(im.width*scale);
+      cv.height=Math.round(im.height*scale);
+      baseImg=im;
+      origDataURL=e.target.result;
+      layers=[];drawPaths=[];
+      document.getElementById("emptyBox").classList.add("hidden");
+      cv.classList.remove("hidden");
+      document.getElementById("dock").classList.remove("hidden");
+      document.getElementById("cmpBtn").classList.remove("hidden");
+      renderCanvas();
+    };
+    im.src=e.target.result;
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+
+function showOrig(flag){isComparing=!!flag;renderCanvas();}
+
+function selHsl(col,btn){
+  curHsl=col;
+  document.querySelectorAll("#hslChips .chip").forEach(function(c){c.classList.remove("active");});
+  btn.classList.add("active");
+  document.getElementById("s-hsat").value=hslVals[col].s;
+  document.getElementById("s-hlum").value=hslVals[col].l;
+  document.getElementById("v-hsat").innerText=hslVals[col].s;
+  document.getElementById("v-hlum").innerText=hslVals[col].l;
+}
+function updHsl(){
+  hslVals[curHsl].s=parseInt(document.getElementById("s-hsat").value)||0;
+  hslVals[curHsl].l=parseInt(document.getElementById("s-hlum").value)||0;
+  document.getElementById("v-hsat").innerText=hslVals[curHsl].s;
+  document.getElementById("v-hlum").innerText=hslVals[curHsl].l;
+  renderCanvas();
+}
+
+function updAdj(){
+  ["exp","con","hi","sh","tmp","sat","clr","vig","grn","blr","rad","bok"].forEach(function(k){
+    var el=document.getElementById("s-"+k),v=document.getElementById("v-"+k);
+    if(el&&v)v.innerText=el.value+(k==="rad"?"%":"");
+  });
+  renderCanvas();
+}
+
+function applyPreset(name,btn){
+  document.querySelectorAll("#t-lr .chip").forEach(function(c){c.classList.remove("active");});
+  btn.classList.add("active");
+  var presets={
+    none:{exp:0,con:0,hi:0,sh:0,tmp:0,sat:0,clr:0,vig:0},
+    teal:{exp:5,con:22,hi:-20,sh:18,tmp:-18,sat:15,clr:25,vig:30},
+    moody:{exp:-12,con:28,hi:-30,sh:-10,tmp:-10,sat:-22,clr:35,vig:45},
+    golden:{exp:10,con:14,hi:-10,sh:20,tmp:35,sat:22,clr:15,vig:20},
+    vivid:{exp:8,con:20,hi:10,sh:15,tmp:5,sat:40,clr:30,vig:10},
+    bw:{exp:5,con:38,hi:15,sh:-15,tmp:0,sat:-100,clr:45,vig:35}
+  };
+  var p=presets[name]||presets.none;
+  Object.keys(p).forEach(function(k){var el=document.getElementById("s-"+k);if(el)el.value=p[k];});
+  updAdj();
+}
+
+function resetAll(){
+  if(!baseImg)return;
+  applyPreset("none",document.querySelector("#t-lr .chip"));
+  document.getElementById("s-grn").value=0;
+  document.getElementById("s-blr").value=0;
+  document.getElementById("s-bok").value=0;
+  hslVals={red:{s:0,l:0},org:{s:0,l:0},yel:{s:0,l:0},grn:{s:0,l:0},blu:{s:0,l:0}};
+  layers=[];drawPaths=[];
+  updAdj();
+}
+
+function renderCanvas(){
+  if(!baseImg)return;
+  var w=cv.width,h=cv.height;
+  ctx.clearRect(0,0,w,h);
+  if(isComparing){ctx.drawImage(baseImg,0,0,w,h);return;}
+
+  var exp=+document.getElementById("s-exp").value;
+  var con=+document.getElementById("s-con").value;
+  var hi=+document.getElementById("s-hi").value;
+  var sh=+document.getElementById("s-sh").value;
+  var tmp=+document.getElementById("s-tmp").value;
+  var sat=+document.getElementById("s-sat").value;
+  var clr=+document.getElementById("s-clr").value;
+  var vig=+document.getElementById("s-vig").value;
+  var grn=+document.getElementById("s-grn").value;
+  var blr=+document.getElementById("s-blr").value;
+  var rad=(+document.getElementById("s-rad").value)/100;
+  var bok=+document.getElementById("s-bok").value;
+
+  // 1. DSLR AI Lens Blur Layer (Background Blurred + Focus Point Sharp)
+  if(blr>0){
+    ctx.save();
+    ctx.filter="blur("+blr+"px) brightness("+(100+bok*0.18)+"%) contrast("+(100+bok*0.15)+"%)";
+    ctx.drawImage(baseImg,-blr,-blr,w+blr*2,h+blr*2);
+    ctx.restore();
+
+    var off=document.createElement("canvas");off.width=w;off.height=h;
+    var octx=off.getContext("2d");
+    octx.drawImage(baseImg,0,0,w,h);
+    octx.globalCompositeOperation="destination-in";
+    var maxR=Math.max(w,h)*rad;
+    var grd=octx.createRadialGradient(w*focusX,h*focusY,maxR*0.35,w*focusX,h*focusY,maxR);
+    grd.addColorStop(0,"rgba(0,0,0,1)");
+    grd.addColorStop(1,"rgba(0,0,0,0)");
+    octx.fillStyle=grd;
+    octx.fillRect(0,0,w,h);
+    ctx.drawImage(off,0,0);
+  }else{
+    ctx.drawImage(baseImg,0,0,w,h);
+  }
+
+  // 2. Pixel-Level Lightroom Tone, Temp, HSL & Grain Engine
+  var imgD=ctx.getImageData(0,0,w,h),d=imgD.data;
+  var expF=Math.pow(2,exp/50);
+  var conF=(259*(con*1.5+255))/(255*(259-con*1.5));
+  var satF=1+(sat/100);
+
+  for(var i=0;i<d.length;i+=4){
+    var r=d[i],g=d[i+1],b=d[i+2];
+    // Exposure & Temp
+    r=r*expF + tmp*0.6;
+    g=g*expF;
+    b=b*expF - tmp*0.6;
+
+    // Highlights & Shadows
+    var lum=(0.299*r+0.587*g+0.114*b)/255;
+    if(lum>0.5){var hf=(lum-0.5)*2*hi*0.8;r+=hf;g+=hf;b+=hf;}
+    else{var sf=(0.5-lum)*2*sh*0.8;r+=sf;g+=sf;b+=sf;}
+
+    // Contrast & Clarity punch
+    var cBoost=conF+(clr*0.004);
+    r=cBoost*(r-128)+128;
+    g=cBoost*(g-128)+128;
+    b=cBoost*(b-128)+128;
+
+    // HSL Color Mixer
+    if(r>g && r>b){
+      var isOrg=(g>b*1.25);
+      var hObj=isOrg?hslVals.org:hslVals.red;
+      r+=hObj.l*0.6;g+=hObj.l*0.4;
+      var avg=(r+g+b)/3;
+      r=avg+(r-avg)*(1+hObj.s/100);g=avg+(g-avg)*(1+hObj.s/100);
+    }else if(g>r && g>b){
+      var isYel=(r>b*1.4);
+      var hObj2=isYel?hslVals.yel:hslVals.grn;
+      g+=hObj2.l*0.6;r+=hObj2.l*0.3;
+      var avg2=(r+g+b)/3;
+      g=avg2+(g-avg2)*(1+hObj2.s/100);
+    }else if(b>r && b>g){
+      b+=hslVals.blu.l*0.6;
+      var avg3=(r+g+b)/3;
+      b=avg3+(b-avg3)*(1+hslVals.blu.s/100);
+    }
+
+    // Global Saturation
+    var gray=0.299*r+0.587*g+0.114*b;
+    r=gray+(r-gray)*satF;
+    g=gray+(g-gray)*satF;
+    b=gray+(b-gray)*satF;
+
+    // Film Grain
+    if(grn>0){
+      var n=(Math.random()-0.5)*grn;
+      r+=n;g+=n;b+=n;
+    }
+
+    d[i]=r<0?0:(r>255?255:r);
+    d[i+1]=g<0?0:(g>255?255:g);
+    d[i+2]=b<0?0:(b>255?255:b);
+  }
+  ctx.putImageData(imgD,0,0);
+
+  // 3. Vignette
+  if(vig>0){
+    var vg=ctx.createRadialGradient(w/2,h/2,w*0.25,w/2,h/2,Math.max(w,h)*0.72);
+    vg.addColorStop(0,"rgba(0,0,0,0)");
+    vg.addColorStop(1,"rgba(0,0,0,"+(vig/115)+")");
+    ctx.fillStyle=vg;
+    ctx.fillRect(0,0,w,h);
+  }
+
+  // 4. Draw Brush Paths
+  drawPaths.forEach(function(p){
+    if(p.pts.length<2)return;
+    ctx.save();ctx.strokeStyle=p.col;ctx.lineWidth=Math.max(4,w*0.008);ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(p.pts[0].x*w,p.pts[0].y*h);
+    for(var k=1;k<p.pts.length;k++)ctx.lineTo(p.pts[k].x*w,p.pts[k].y*h);
+    ctx.stroke();ctx.restore();
+  });
+
+  // 5. Picsart Overlays (Text & Sticker Layers)
+  layers.forEach(function(ly){
+    ctx.save();
+    if(ly.type==="text"){
+      var fz=Math.round(w*0.075);
+      ctx.font="900 "+fz+"px system-ui,sans-serif";
+      ctx.textAlign="center";
+      ctx.shadowColor=ly.glow;ctx.shadowBlur=18;
+      ctx.lineWidth=Math.max(3,fz*0.08);ctx.strokeStyle="#000";
+      ctx.strokeText(ly.text,ly.x*w,ly.y*h);
+      ctx.fillStyle=ly.col;
+      ctx.fillText(ly.text,ly.x*w,ly.y*h);
+    }else if(ly.type==="img"){
+      var lw=w*0.35,lh=lw*(ly.img.height/ly.img.width);
+      ctx.drawImage(ly.img,ly.x*w-lw/2,ly.y*h-lh/2,lw,lh);
+    }
+    ctx.restore();
+  });
+}
+
+// Canvas Touch Interactions (Focus Point, Drag Text/Sticker, Draw)
+function getPos(e){
+  var rect=cv.getBoundingClientRect();
+  var cx=e.touches?e.touches[0].clientX:e.clientX;
+  var cy=e.touches?e.touches[0].clientY:e.clientY;
+  return{x:(cx-rect.left)/rect.width,y:(cy-rect.top)/rect.height};
+}
+cv.addEventListener("pointerdown",function(e){
+  var p=getPos(e);
+  if(drawMode){isDrawing=true;drawPaths.push({col:document.getElementById("brushCol").value,pts:[p]});renderCanvas();return;}
+  for(var i=layers.length-1;i>=0;i--){
+    if(Math.abs(layers[i].x-p.x)<0.18 && Math.abs(layers[i].y-p.y)<0.12){dragLayer=layers[i];return;}
+  }
+  focusX=p.x;focusY=p.y;
+  if(+document.getElementById("s-blr").value>0)renderCanvas();
+});
+cv.addEventListener("pointermove",function(e){
+  var p=getPos(e);
+  if(isDrawing){drawPaths[drawPaths.length-1].pts.push(p);renderCanvas();}
+  else if(dragLayer){dragLayer.x=p.x;dragLayer.y=p.y;renderCanvas();}
+});
+cv.addEventListener("pointerup",function(){isDrawing=false;dragLayer=null;});
+
+function addTextLayer(){
+  var t=document.getElementById("txtIn").value.trim();if(!t||!baseImg)return;
+  layers.push({type:"text",text:t,x:0.5,y:0.5,col:document.getElementById("txtCol").value,glow:document.getElementById("glowCol").value});
+  document.getElementById("txtIn").value="";renderCanvas();
+}
+function addImgLayer(inp){
+  if(!inp.files||!inp.files[0]||!baseImg)return;
+  var r=new FileReader();r.onload=function(e){var im=new Image();im.onload=function(){layers.push({type:"img",img:im,x:0.5,y:0.5});renderCanvas();};im.src=e.target.result;};r.readAsDataURL(inp.files[0]);
+}
+function clearLayers(){layers=[];drawPaths=[];renderCanvas();}
+function toggleDraw(){drawMode=!drawMode;document.getElementById("drawToggle").innerText="✏️ Draw Brush: "+(drawMode?"ON":"OFF");}
+
+function cropRatio(rw,rh){
+  if(!baseImg)return;
+  var off=document.createElement("canvas");
+  var w=baseImg.width,h=baseImg.height,nw=w,nh=Math.round(w*(rh/rw));
+  if(nh>h){nh=h;nw=Math.round(h*(rw/rh));}
+  off.width=nw;off.height=nh;
+  off.getContext("2d").drawImage(baseImg,(w-nw)/2,(h-nh)/2,nw,nh,0,0,nw,nh);
+  var im=new Image();im.onload=function(){baseImg=im;cv.width=nw>1280?1280:nw;cv.height=Math.round(cv.width*(nh/nw));renderCanvas();};im.src=off.toDataURL();
+}
+function rotate90(){
+  if(!baseImg)return;
+  var off=document.createElement("canvas");off.width=baseImg.height;off.height=baseImg.width;
+  var o=off.getContext("2d");o.translate(off.width/2,off.height/2);o.rotate(Math.PI/2);o.drawImage(baseImg,-baseImg.width/2,-baseImg.height/2);
+  var im=new Image();im.onload=function(){baseImg=im;var t=cv.width;cv.width=cv.height;cv.height=t;renderCanvas();};im.src=off.toDataURL();
+}
+function flipH(){
+  if(!baseImg)return;
+  var off=document.createElement("canvas");off.width=baseImg.width;off.height=baseImg.height;
+  var o=off.getContext("2d");o.translate(off.width,0);o.scale(-1,1);o.drawImage(baseImg,0,0);
+  var im=new Image();im.onload=function(){baseImg=im;renderCanvas();};im.src=off.toDataURL();
+}
+
+// NO.1 GENERATIVE AI PHOTO STUDIO (Prompt Editing + Image Generation)
+function quickAI(p){document.getElementById("aiPrompt").value=p;runMagicAI();}
+
+async function runMagicAI(){
+  var prompt=document.getElementById("aiPrompt").value.trim();
+  if(!prompt)return alert("AI ko batayein ki photo mein kya karna hai!");
+  if(!navigator.onLine)return alert("Internet ON karein!");
+  var st=document.getElementById("aiStatus"),btn=document.getElementById("aiGoBtn");
+  btn.disabled=true;st.innerText="⚡ AI Studio editing your photo (5-10 sec)...";
+
+  try{
+    // If Gemini Vision selected, refine prompt into hyper-detailed visual instruction first
+    var finalPrompt=prompt;
+    if(curAi==="gemini" && baseImg){
+      var b64=cv.toDataURL("image/jpeg",0.7).split(",")[1];
+      var gr=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key="+GK,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({contents:[{parts:[{text:"Describe this person/subject in detail and combine with this edit instruction into one photorealistic image generation prompt: "+prompt},{inline_data:{mime_type:"image/jpeg",data:b64}}]}]})
+      });
+      var gd=await gr.json();
+      if(gd.candidates?.[0]?.content?.parts?.[0]?.text)finalPrompt=gd.candidates[0].content.parts[0].text;
+    }
+
+    var modelParam=(curAi==="flux")?"flux":"kontext";
+    var url="https://image.pollinations.ai/prompt/"+encodeURIComponent(finalPrompt)+"?model="+modelParam+"&width="+cv.width+"&height="+cv.height+"&nologo=true&seed="+Math.floor(Math.random()*99999);
+    var res=await fetch(url);
+    if(!res.ok)throw new Error("AI server busy ("+res.status+")");
+    var blob=await res.blob();
+    var objUrl=URL.createObjectURL(blob);
+    var newIm=new Image();
+    newIm.onload=function(){
+      baseImg=newIm;
+      renderCanvas();
+      st.innerText="✅ AI Magic Applied! (Hold Before/After to compare)";
+      btn.disabled=false;
+    };
+    newIm.src=objUrl;
+  }catch(err){
+    st.innerText="❌ "+err.message+" — Try again!";
+    btn.disabled=false;
+  }
+}
+
+function exportHD(){
+  if(!baseImg)return;
+  var a=document.createElement("a");
+  a.download="PixelForge_Pro_"+Date.now()+".png";
+  a.href=cv.toDataURL("image/png",1.0);
+  a.click();
+}
+
+// Secret Admin Panel (5 Taps + PIN 8423)
+var tc=0,tt=null;function stap(){tc++;clearTimeout(tt);tt=setTimeout(function(){tc=0;},1500);if(tc>=5){tc=0;document.getElementById("adm").classList.remove("hidden");}}
+function ulck(){if(btoa(document.getElementById("apin").value.trim())==="ODQyMw=="){document.getElementById("alog").classList.add("hidden");document.getElementById("actrl").classList.remove("hidden");document.getElementById("gkey").value=GK;}else alert("Wrong PIN");}
+function svKey(){GK=document.getElementById("gkey").value.trim();localStorage.setItem("pixelforge_api_key",GK);alert("✅ Saved!");}
+function addP(){var p=document.getElementById("pbox").value.trim();if(!p)return;var arr=JSON.parse(localStorage.getItem("pixelforge_addons")||"[]");arr.push(p);localStorage.setItem("pixelforge_addons",JSON.stringify(arr));document.getElementById("pbox").value="";ldAddons();alert("✅ Addon Added!");}
+function clrP(){localStorage.removeItem("pixelforge_addons");ldAddons();alert("✅ Cleared!");}
+function ldAddons(){var arr=JSON.parse(localStorage.getItem("pixelforge_addons")||"[]"),h=document.getElementById("addonHost");h.innerHTML="";arr.forEach(function(c){var d=document.createElement("div");d.innerHTML=c;h.appendChild(d);d.querySelectorAll("script").forEach(function(s){var ns=document.createElement("script");ns.textContent=s.textContent;document.body.appendChild(ns);});});}
+ldAddons();
+function apFull(){var c=document.getElementById("fcode").value.trim();if(c.indexOf("</html>")===-1)return alert("Full HTML paste karein!");localStorage.setItem("pixelforge_live_html_override",c);location.reload();}
+function rsFull(){localStorage.removeItem("pixelforge_live_html_override");location.reload();}
+</script>
+</body>
+</html>
