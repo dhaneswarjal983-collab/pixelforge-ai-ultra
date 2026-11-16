@@ -15,11 +15,11 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
       - name: Setup Capacitor & Build APK
         run: |
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
           npx cap init "PixelForge AI Ultra" "com.dhaneshwar.pixelforge" --web-dir=www
           npx cap add android
           npx cap sync android
